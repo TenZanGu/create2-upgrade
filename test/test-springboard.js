@@ -36,14 +36,26 @@ contract("Springboard", accounts => {
 
       // check the contract version
       const walletV1 = await Wallet.at(walletAddress);
-      let version = await walletV1.version();
+      let version1 = await walletV1.version();
 
-      console.log(walletAddress, version);
-      assert.equal(version, "1.0", "version should be 1.0");
+      console.log(walletAddress, version1);
+      assert.equal(version1, "1.0", "version should be 1.0");
          
       // Write you code here....
       // 1) Upgrade wallet to V2
       // 2) verify wallet version == 2.0 after upgrade
+      await walletV1.die();
+      const walletRuntimeCodeV2 = WalletV2.deployedBytecode;
+      let txV2 = await springboard.execute(walletRuntimeCodeV2);
+      assert.equal(txV2.logs.length, 1, "should have 1 event log");
+      assert.equal(txV2.logs[0].event, "ContractCreated", "different event");
+
+      const walletV2 = await WalletV2.at(walletAddress);
+      let version2 = await walletV2.version();
+
+      console.log(walletAddress, version2);
+      assert.equal(version2, "2.0", "version should be 2.0");
       
+
    });
 });
